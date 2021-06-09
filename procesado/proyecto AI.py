@@ -5,7 +5,16 @@ import win32gui
 import win32ui
 import win32con
 
+def list_all_open_windows():
+    '''Lists the names and handles of all opened windows
+    '''
+    def winEnumHandler( hwnd, ctx ):
+        if win32gui.IsWindowVisible( hwnd ):
+            print (hex(hwnd), win32gui.GetWindowText( hwnd ))
 
+    win32gui.EnumWindows(winEnumHandler, None)
+
+# list_all_open_windows()
 
 def window_capture():
     hwnd = win32gui.FindWindow(None, 'Samurai Gunn')
