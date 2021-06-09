@@ -89,14 +89,14 @@ def classify_tile(x, y, img, sliced):
     
     return result
 
-def lifes(img):
+def lives(img):
     '''
     We settled a standar player for the agent which is the player 1 and the green character. 
-    His lifes are static in the top left area of the map. For now this part of the coding seek
-    a pair of coordinates on the image matrix that will represent each of the ten lifes for the green player, 
-    so the agent know the lifes he has at every moment. It also works for the rewarding in future plans. 
+    His lives are static in the top left area of the map. For now this part of the coding seek
+    a pair of coordinates on the image matrix that will represent each of the ten lives for the green player, 
+    so the agent know the lives he has at every moment. It also works for the rewarding in future plans. 
 
-    Coordinates of the 10 lifes at the distance of 3 pixels high and 3 pixels width
+    Coordinates of the 10 lives at the distance of 3 pixels high and 3 pixels width
     from the first pixel on the top left side of the "leaf" are:
 
     (7,8)       (7,15)
@@ -124,12 +124,12 @@ def lifes(img):
     return(life)
         # Aquí el else deberia ser una respuesta negativa, como un reward negativo (?)"
         
-def enemy_lifes(img):
+def enemy_lives(img):
     '''
-    For finding the enemy lifes, we used the cv.matchTemplate function which review the template in the corresponding image
+    For finding the enemy lives, we used the cv.matchTemplate function which review the template in the corresponding image
     but in gray scale, which was previously converted. The template was created manually with black background and 
-    the white skull, that represents the lifes of the enemy in survival mode. We reduced the area were the template
-    was evaluated from the entire image to the section were the lifes of the enemy stayed static. For avoiding 
+    the white skull, that represents the lives of the enemy in survival mode. We reduced the area were the template
+    was evaluated from the entire image to the section were the lives of the enemy stayed static. For avoiding 
     multiple detection the threshold for the mathcTemplate was 0.6 and determined arbitray according to various scenarios.     
     '''
     gray_img=cv.cvtColor(img, cv.COLOR_BGR2GRAY)    
@@ -161,7 +161,7 @@ def enemy_lifes(img):
    #         enemy_lv=cv.rectangle(line,top_left, bottom_right, line_color, line_type)
    # else:
    #     print('no se llama')        
-    print('Enemy lifes:', count_enemy)    
+    print('Enemy lives:', count_enemy)    
     return(enemy_lv)
 
 def map_mask(img):
@@ -363,12 +363,12 @@ if __name__ == "__main__":
             print('Avg FPS {}'.format(cumulative_fps/frame_count))
         frame_count += 1
         
-        pj_lifes = lifes(screenshot)
+        pj_lives = lives(screenshot)
         if frame_count % 512 == 0:
-            print("Player lifes:",  pj_lifes)
+            print("Player lives:",  pj_lives)
             
-            enemy = enemy_lifes(screenshot)
-            cv.imshow('Area of enemy lifes', enemy)
+            enemy = enemy_lives(screenshot)
+            cv.imshow('Area of enemy lives', enemy)
             frame_count = 1
             cumulative_fps = 0
         
