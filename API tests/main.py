@@ -22,11 +22,11 @@ if __name__ == "__main__":
         #screenshot = cv.imread('sample0.jpg')
         screenshot = window_capture('Samurai Gunn')
         
-        img = simplify_2(screenshot, offset, mask=mk)
+        img = simplify_2(screenshot, offset=offset, mask=mk)
         
         # re-calculate mask every so often
         if once: 
-            mk = map_mask(simplify_2(screenshot, offset))
+            mk = map_mask(simplify_2(screenshot, offset=offset))
             once = False
         
         dim = (img.shape[1] * 16, img.shape[0] * 16)
