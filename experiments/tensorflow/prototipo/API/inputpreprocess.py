@@ -1,12 +1,12 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Jun 11 00:58:15 2021
-
-@author: caleu
-"""
 import cv2 as cv
 import numpy as np
+from windowcapture import window_capture
 
+class Map:
+    def __init__(self, offset, screenshot) -> None:
+        self.offset = offset
+        self.mask = map_mask(simplify_2(screenshot))
+    
 def lives(img):
     '''
     We settled a standar player for the agent which is the player 1 and the green character. 
@@ -69,7 +69,7 @@ def enemy_lives(img):
     #print('Enemy lives:', count_enemy)    
     return(enemy_lv)
 
-def map_mask(img):
+def map_mask(img) -> np.ndarray:
     '''Makes a matrix with boolean values, marking with 1 all tiles that are
     a solid block on the map, and a 0 for empty air tiles.
     
@@ -86,6 +86,37 @@ def map_mask(img):
                 mask[i][j] = 0
     return mask
 
+def observation(map: Map):
+    # "player key color" is a distinctive color for the rat-like player
+    PKC = (65, 191, 97)
+
+    # "enemy key color" is a distinctive color for the enemy ninja bot in survival mode
+    EKC = (11, 11, 13)
+
+    # "mixed key color" is the average color of both, used to indicate both are on the same tile
+    aux = np.zeros(3, dtype='uint8')
+    for i in range(3):
+        aux[i] = (PKC[i] + EKC[i]) / 2
+    MKC = tuple(aux)
+
+    
+    obs = np.zeros((15, 20))
+    const = 10 # used for getting the classifying numbers to a range between 0 and 1 
+    screenshot = window_capture('Samurai Gunn')
+    s_img = simplify_2(screenshot, offset=map.offset, mask=map.mask)
+    for x in range(15):
+        for y in range(20):
+            if tuple(s_img[x, y]) == PKC:
+                obs[x, y] = 5/const
+            if tuple(s_img[x, y]) == EKC:
+                obs[x, y] = 10/const
+            if tuple(s_img[x, y]) == MKC:
+                obs[x, y] = 7/const
+            if tuple(s_img[x, y]) == (0, 0, 0):
+                obs[x, y] = 1/const
+            
+    return obs
+
 def simplify_2(img, offset=0, mask=None):
     '''Reduces the input image resolution by classifying the tiles on the screen and 
     reducing them to 1 px per tile.
@@ -97,6 +128,8 @@ def simplify_2(img, offset=0, mask=None):
     offset: in case the map tiles do not align perfectly with the grid, an offset of 8px down does 
             the trick. (Maps with different offsets have yet to be found, 
             this should allow for different offsets in the X direction)
+            Note: the offset functionality has not been properly tested yet
+
     mask: 20 x 15 matrix of boolean values, where a 1 means it's a solid block 
           and should won't ever contain a player, allowing us to skip checking 
           the corresponding tile.
@@ -118,6 +151,10 @@ def simplify_2(img, offset=0, mask=None):
                                                    y*16 - (offset*(1-sliced)), 
                                                    img, sliced)
                 continue
+            if mask[x][y] == 0:
+                simple_img[x, y] = find_players(x*16 - (offset*(1-sliced)),
+                                                y*16 - (offset*(1-sliced)),
+                                                img, sliced)
     simple_img = simple_img.astype('uint8')
     return simple_img
 
@@ -140,12 +177,12 @@ def classify_tile_2(x, y, img, sliced):
     int: Returns a single int that will classify the tile
     '''
 
-    row_step = 2
-    col_step = 2
+    ROW_STEP = 2
+    COL_STEP = 2
     freq = {}
     corrected_height_range = int(16/(1+sliced))
-    for i in range(0, corrected_height_range, row_step):
-        for j in range(0, 16, col_step):
+    for i in range(0, corrected_height_range, ROW_STEP):
+        for j in range(0, 16, COL_STEP):
             c = img[x+i][y+j]  
             c_aux = (c[0], c[1], c[2]) # change the color array into a hashable tuple
             if freq.get(c_aux) == None:
@@ -163,12 +200,14 @@ def classify_tile_2(x, y, img, sliced):
     result = keys[index]
     return result
 
-player_temp_r = cv.imread('char_templates/splinter_needle_r.jpg')
-player_temp_l = cv.imread('char_templates/splinter_needle_l.jpg')
-enemy_temp = cv.imread('char_templates/ninja_needle.jpg')
+PLAYER_TEMP_R = cv.imread('char_templates/splinter_needle_r.jpg')
+PLAYER_TEMP_L = cv.imread('char_templates/splinter_needle_l.jpg')
+ENEMY_TEMP_GREEN = cv.imread('char_templates/ninja_needle_green.jpg')
+ENEMY_TEMP_CYAN = cv.imread('char_templates/ninja_cyan.png')
 
-methods = ['cv.TM_CCOEFF', 'cv.TM_CCOEFF_NORMED', 'cv.TM_CCORR',
-           'cv.TM_CCORR_NORMED', 'cv.TM_SQDIFF', 'cv.TM_SQDIFF_NORMED']
+# This is just here for reference. Used in cv.matchTemplate()
+# METHODS = ['cv.TM_CCOEFF', 'cv.TM_CCOEFF_NORMED', 'cv.TM_CCORR',
+#            'cv.TM_CCORR_NORMED', 'cv.TM_SQDIFF', 'cv.TM_SQDIFF_NORMED']
 
 
 def find_players(x, y, img, sliced):
@@ -183,22 +222,28 @@ def find_players(x, y, img, sliced):
     Return: returns a single int that corresponds with the findings
 
     '''
-    # Note: right now we return a color tuple (BGR)
-    # need to replace this return to a representative int
-
-
     # "player key color" is a distinctive color for the rat-like player
     #  colors in BGR format (???)
-    pkc = (65, 191, 97)
+    PKC = (65, 191, 97)
+
     # "enemy key color" is a distinctive color for the enemy ninja bot in survival mode
-    ekc = (11, 11, 13)
+    # EKC2 is used for the ninja with cyan eyes, whose color pallete is slightly different
+    EKC = (11, 11, 13)
+    EKC2 = (20, 20, 32)
     
-    row_step = 2
-    col_step = 2   
-    tile = np.zeros((16, 16, 3), dtype='uint8')
+
+    # "mixed key color" is the average color of both, used to indicate both are on the same tile
+    aux = np.zeros(3, dtype='uint8')
+    for i in range(3):
+        aux[i] = (PKC[i] + EKC[i]) / 2
+    MKC = aux
+
+    ROW_STEP = 2
+    COL_STEP = 2   
     
-    p_threshold = 0.6
-    e_threshold = 0.312
+
+    P_THRESHOLD = 0.6
+    E_THRESHOLD = 0.3
     
     player_flag = False
     enemy_flag = False
@@ -206,16 +251,20 @@ def find_players(x, y, img, sliced):
 
     # A preliminary search is done to check if there is a chance of a character being present
     # using the character's "key colors"
-    for i in range(0, corrected_height_range, row_step):
-        for j in range(0, 16, col_step):
+    for i in range(0, corrected_height_range, ROW_STEP):
+        for j in range(0, 16, COL_STEP):
             aux = img[x+i][y+j][:3]
-            if tuple(aux) == pkc:
+            if tuple(aux) == PKC:
                 player_flag = True
                 #print('player flag set')
-            if tuple(aux) == ekc:
+            if tuple(aux) == EKC:
+                enemy_flag = True
+                #print('enemy flag set')
+            if tuple(aux) == EKC2:
                 enemy_flag = True
                 #print('enemy flag set')
                 
+    tile = np.zeros((16, 16, 3), dtype='uint8')
     if player_flag or enemy_flag:
         for i in range(0, corrected_height_range):
             for j in range(0, 16):
@@ -226,10 +275,10 @@ def find_players(x, y, img, sliced):
     min_val_e, max_val_e, min_loc_e, max_loc_e = (0, 0, (0,0), (0,0))
     
     if player_flag:
-        search_p1 = cv.matchTemplate(tile, player_temp_r, cv.TM_CCOEFF_NORMED)
+        search_p1 = cv.matchTemplate(tile, PLAYER_TEMP_R, cv.TM_CCOEFF_NORMED)
         min_val_p1, max_val_p1, min_loc_p, max_loc_p = cv.minMaxLoc(search_p1)
         
-        search_p2 = cv.matchTemplate(tile, player_temp_l, cv.TM_CCOEFF_NORMED)
+        search_p2 = cv.matchTemplate(tile, PLAYER_TEMP_L, cv.TM_CCOEFF_NORMED)
         min_val_p2, max_val_p2, min_loc_p, max_loc_p = cv.minMaxLoc(search_p2)
         
         # used for CCOEFF and CCORR methods where the highest value represents 
@@ -241,19 +290,83 @@ def find_players(x, y, img, sliced):
         # min_val_p = min_val_p1 if (min_val_p1 < min_val_p2) else min_val_p2
         
     if enemy_flag:
-        search_e = cv.matchTemplate(tile, enemy_temp, cv.TM_CCOEFF_NORMED)
-        min_val_e, max_val_e, min_loc_e, max_loc_e = cv.minMaxLoc(search_e)
-        # print('max_val for enemy {}'.format(max_val_e))
-    # result = np.zeros(3)
-    if max_val_p > p_threshold and max_val_e < e_threshold:
+        search_e = cv.matchTemplate(tile, ENEMY_TEMP_GREEN, cv.TM_CCOEFF_NORMED)
+        min_val_e1, max_val_e1, min_loc_e1, max_loc_e1 = cv.minMaxLoc(search_e)
+
+        search_e2 = cv.matchTemplate(tile, ENEMY_TEMP_CYAN, cv.TM_CCOEFF_NORMED)
+        min_val_e2, max_val_e2, min_loc_e2, max_loc_e2 = cv.minMaxLoc(search_e2)
+
+        max_val_e = max_val_e1 if (max_val_e1 > max_val_e2) else max_val_e2
+
+        
+    if max_val_p > P_THRESHOLD and max_val_e < E_THRESHOLD:
         # Player found in tile
-        return 5
-    elif max_val_p < p_threshold and max_val_e > e_threshold:
+        return PKC
+    elif max_val_p < P_THRESHOLD and max_val_e > E_THRESHOLD:
         # Enemy found in tile
-        #return ekc
-        return 10
-    elif max_val_p > p_threshold and max_val_e > e_threshold:
+        #print(max_val_e)
+        #cv.imwrite('tile.png', tile)
+        return EKC
+    elif max_val_p > P_THRESHOLD and max_val_e > E_THRESHOLD:
         # Both player and enemy found in the same tile
-        return 7
+        return MKC
     else:
-        return 0
+        return (255, 255, 255)
+
+def render(observation):
+    img = np.zeros((15, 20, 3))
+    const = 10
+    for x in range(15):
+        for y in range(20):
+            img[x, y] = (255, 255, 255)
+            if observation[x, y] == 5/const:
+                #player
+                img[x, y] = (0, 255, 0)
+                continue
+            if observation[x, y] == 10/const:
+                #enemy
+                img[x, y] = (0, 0, 255)
+                continue
+            if observation[x, y] == 7/const:
+                #player&enemy
+                img[x, y] = (0, 255, 255)
+                continue
+            if observation[x, y] == 1/const:
+                #solid block
+                img[x, y] = (0, 0, 0)
+                continue
+
+    dim = (img.shape[1] * 16, img.shape[0] * 16)
+    img = cv.resize(img, dim, interpolation=cv.INTER_AREA)
+    cv.imshow('Computer Vision', img)
+    print('Remember to take care of this if statement. cv.destroyAllWindows does not need to be called in this very function')
+    if cv.waitKey(0) & 0xFF == ord('q'):
+        cv.destroyAllWindows()
+
+#import os
+#when testing with this main routine, remember to check the path of the terminal that's running this
+if __name__ == '__main__':
+    img = window_capture('Samurai Gunn')
+    cv.imshow('Screenshot', img)
+    map = Map(0, img)
+    
+    while True:
+        obs = observation(map)        
+        render(obs)
+        if cv.waitKey(1) & 0xFF == ord('q'):
+            cv.destroyAllWindows() 
+            break
+    
+    # obs = observation(map)
+    # render(obs)
+    # if cv.waitKey(0) & 0xFF == ord('q'):
+    #     cv.destroyAllWindows()
+    # #showing mask
+    # temp = map.mask
+    # for x in range(15):
+    #     for y in range(20):
+    #         temp[x,y] = temp[x,y] * 255
+    
+    # dim = (temp.shape[1] * 16, temp.shape[0] * 16)
+    # img_ = cv.resize(temp, dim, interpolation=cv.INTER_AREA)
+    # cv.imshow('Mask', img_)
