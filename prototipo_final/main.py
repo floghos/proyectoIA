@@ -1,6 +1,6 @@
 import os
 import gym
-from dqn_tf_test import DeepQNetwork, Agent
+from tf_dqn import DeepQNetwork, Agent
 # from utils import plotLearning
 import numpy as np
 from gym import wrappers
