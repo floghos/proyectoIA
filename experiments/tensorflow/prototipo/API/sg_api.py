@@ -1,13 +1,8 @@
 import cv2 as cv
 import numpy as np
 from time import time
-from windowcapture import window_capture
-from inputpreprocess import simplify_2, map_mask, lives, enemy_lives
-
-class Map:
-    def __init__(self, offset, screenshot) -> None:
-        self.offset = offset
-        self.mask = map_mask(simplify_2(screenshot))
+from inputpreprocess import observation, Map
+from outputcommands import press, release
 
 def setup():
     '''
@@ -21,19 +16,25 @@ def setup():
     # - seleccionar personaje
     # - seleccionar mapa
     
-    screenshot = window_capture('Samurai Gunn')
-    map = Map(0, screenshot)
+    #screenshot = window_capture('Samurai Gunn')
+    #map = Map(0, screenshot)
     return map
 
 def reset(map: Map):
     '''
+    This funcion is called when an episode has concluded.
+    It resets the environment and returns an initial observation (simplified screenshot).
     
+    Parameters:
+        Map
+    Returns:
+        ndarray (simplified screenshot)
     '''
     #
 
-    screenshot = window_capture('Samurai Gunn')
+    initial_state = observation(map)
 
-    initial_state = simplify_2(screenshot, mask=map.mask)
+   
     return initial_state
 
 def step(action):    
