@@ -20,7 +20,20 @@ def list_all_open_windows():
 
 # list_all_open_windows()
 
-def window_capture(window_name, p=False, bmpFileName='sample.jpg'):
+def window_capture(window_name, save=False, bmpFileName='sample.jpg'):
+    '''
+    Takes a screenshot of the given window. 
+    Note that this implementation is tuned with a couple hard-coded values to match the 
+    windowed display for the game "Samurai Gunn"
+
+    Parameters:
+        window_name: (string) name of the window that needs capturing.
+        save: (boolean) answers the question: Do you want to save the screenshot to a file? 
+        bmpFileName: (string) name given to the file when saving the screenshot. Must include extension.
+
+    Returns:
+        img: (ndarray) Array of dimansions (h=240, w=320, 4). The 4th channel is the alpha value.
+    '''
     hwnd = win32gui.FindWindow(None, window_name)
     
     # Getting the window's size and accounting for window screenshot borders
@@ -49,7 +62,7 @@ def window_capture(window_name, p=False, bmpFileName='sample.jpg'):
     cDC.BitBlt((0, 0), (w, h) , dcObj, (crop_x, crop_y), win32con.SRCCOPY)
     
     # To save screenshot to file, uncomment the 2 lines below 
-    if p:
+    if save:
         dataBitMap.SaveBitmapFile(cDC, bmpFileName)
     
     # Converting to format useful for opencv
@@ -63,12 +76,12 @@ def window_capture(window_name, p=False, bmpFileName='sample.jpg'):
     win32gui.ReleaseDC(hwnd, wDC)
     win32gui.DeleteObject(dataBitMap.GetHandle())
     
-    # Dropping alpha channel may be useful for some applications, like cv.matchTemplate()
-    # which may throw an error otherwise
+    # Dropping alpha channel may be useful for some applications, like when using
+    # cv.matchTemplate(), which may throw an error otherwise
     
-    #img = img[...,:3]   # this drops alpha channel 
+    #img = img[...,:3]   # this drops alpha channel. 
     
     return img
 
 if __name__ == "__main__":
-    window_capture('Samurai Gunn', p=True, bmpFileName='test.jpg')
+    window_capture('Samurai Gunn', save=True, bmpFileName='test.jpg')
