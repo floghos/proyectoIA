@@ -1,0 +1,7 @@
+The source of this example is: https://www.youtube.com/watch?v=ELE2_Mftqoc&ab_channel=freeCodeCamp.org
+In the video description there is a link to a github repo.
+
+Specific links:
+dqn_main_test.py -> https://github.com/philtabor/Youtube-Code-Repository/blob/master/ReinforcementLearning/DeepQLearning/main_tf_dqn_breakout.py 
+
+dqn_tf_test.py -> https://github.com/philtabor/Youtube-Code-Repository/blob/master/ReinforcementLearning/DeepQLearning/archive/simple_dqn_tf.py
