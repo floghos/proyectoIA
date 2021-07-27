@@ -1,6 +1,7 @@
 import cv2 as cv
 import numpy as np
-from windowcapture import window_capture
+from .windowcapture import window_capture
+# from windowcapture import window_capture  #use when testing this module by itself
 
 class Map:
     def __init__(self, offset, screenshot) -> None:

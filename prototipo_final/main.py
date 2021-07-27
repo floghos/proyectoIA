@@ -5,7 +5,7 @@ from tf_dqn import DeepQNetwork, Agent
 import numpy as np
 from gym import wrappers
 import matplotlib.pyplot as plt
-
+from API.sg_api import reset
 
 def preprocess(observation):
     observation = observation / 255
@@ -30,7 +30,6 @@ if __name__ == '__main__':
     #os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     #os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     #os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
-
     env = gym.make('Breakout-v0')
     load_checkpoint = False  # change this to True if you want to resume previous training (I think?)
     agent = Agent(gamma=0.99, epsilon=1.0, alpha=0.000025, input_dims=(180, 160, 4),

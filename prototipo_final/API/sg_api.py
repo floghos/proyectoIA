@@ -1,8 +1,13 @@
 import cv2 as cv
 import numpy as np
 from time import time
-from inputpreprocess import observation, Map
-from outputcommands import press, release
+
+from .inputpreprocess import observation, Map
+from .outputcommands import press, release
+
+# Use the 2 below instead of the 2 above when testing the module by itself
+# from inputpreprocess import observation, Map
+# from outputcommands import press, release
 
 def setup():
     '''
