@@ -4,9 +4,12 @@ from .windowcapture import window_capture
 # from windowcapture import window_capture  #use when testing this module by itself
 
 class Map:
-    def __init__(self, offset, screenshot) -> None:
+    def __init__(self, offset, screenshot=None) -> None:
         self.offset = offset
-        self.mask = map_mask(simplify_2(screenshot))
+        if screenshot is None:
+            self.mask = None
+        else:
+            self.mask = map_mask(simplify_2(screenshot))
     
 def lives(img):
     '''
@@ -16,7 +19,7 @@ def lives(img):
     so the agent know the lives he has at every moment. It also works for the rewarding in future plans. 
 
     Coordinates of the 10 lives at the distance of 3 pixels high and 3 pixels width
-    from the first pixel on the top left side of the "leaf" are:
+    from the first pixel on the top left side of the "leaves" are:
 
     (7,8)       (7,15)
     (14,8)      (14,15)
@@ -87,7 +90,18 @@ def map_mask(img) -> np.ndarray:
                 mask[i][j] = 0
     return mask
 
-def observation(map: Map):
+def observation(map: Map, raw=False):
+    '''Returns a simplified view of the screen in a 20x15 nparray.
+    If raw is given as True, the raw screenshot of the game is returned instead.
+
+
+    
+    '''
+    screenshot = window_capture('Samurai Gunn')
+
+    if raw:
+        return screenshot
+
     # "player key color" is a distinctive color for the rat-like player
     PKC = (65, 191, 97)
 
@@ -103,7 +117,6 @@ def observation(map: Map):
     
     obs = np.zeros((15, 20))
     const = 10 # used for getting the classifying numbers to a range between 0 and 1 
-    screenshot = window_capture('Samurai Gunn')
     s_img = simplify_2(screenshot, offset=map.offset, mask=map.mask)
     for x in range(15):
         for y in range(20):
@@ -116,7 +129,7 @@ def observation(map: Map):
             if tuple(s_img[x, y]) == (0, 0, 0):
                 obs[x, y] = 1/const
             
-    return obs
+    return obs, screenshot
 
 def simplify_2(img, offset=0, mask=None):
     '''Reduces the input image resolution by classifying the tiles on the screen and 
@@ -234,18 +247,14 @@ def find_players(x, y, img, sliced):
     
 
     # "mixed key color" is the average color of both, used to indicate both are on the same tile
-    aux = np.zeros(3, dtype='uint8')
+    avg = np.zeros(3, dtype='uint8')
     for i in range(3):
-        aux[i] = (PKC[i] + EKC[i]) / 2
-    MKC = aux
+        avg[i] = (PKC[i] + EKC[i]) / 2
+    MKC = avg
 
+    
     ROW_STEP = 2
     COL_STEP = 2   
-    
-
-    P_THRESHOLD = 0.6
-    E_THRESHOLD = 0.3
-    
     player_flag = False
     enemy_flag = False
     corrected_height_range = int(16/(1+sliced))
@@ -272,6 +281,9 @@ def find_players(x, y, img, sliced):
                 tile[i][j] = img[x+i][y+j][:3]
             
                 
+    P_THRESHOLD = 0.6
+    E_THRESHOLD = 0.3
+
     min_val_p, max_val_p, min_loc_p, max_loc_p = (0, 0, (0,0), (0,0))
     min_val_e, max_val_e, min_loc_e, max_loc_e = (0, 0, (0,0), (0,0))
     
