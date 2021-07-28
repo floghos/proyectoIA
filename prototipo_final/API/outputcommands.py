@@ -1,8 +1,9 @@
+# -*- coding: utf-8 -*-
 #import threading
-from pynput.keyboard import Controller
+from pynput.keyboard import Controller, Key
 
 kb = Controller()
-key_dict = {'left':'a', 'right':'d', 'up':'w', 'down':'s', 'jump':'j', 'swing':'k', 'shoot':'l'}
+key_dict = {'left':'a', 'right':'d', 'up':'w', 'down':'s', 'jump':'j', 'swing':'k', 'shoot':'l', 'menu': Key.esc}
 
 delay = 0
 
@@ -43,11 +44,10 @@ def release(key):
 def tap(key):
     # time.sleep(delay)
     if key in key_dict.keys():
+        #print ('tapping', key)
         kb.tap(key_dict[key])
-        # print ('tapping', key)
     else:
         try:
             kb.tap(key)
         except:
             print('No se pudo hacer tap "{}"'.format(key))
-    
