@@ -3,13 +3,13 @@ import numpy as np
 from time import time
 
 from .inputpreprocess import observation, Map, lives, enemy_lives
-from .outputcommands import press, release
+from .outputcommands import press, release, tap
 
 # Use the 2 below instead of the 2 above when testing the module by itself
 # from inputpreprocess import observation, Map
 # from outputcommands import press, release
 
-def restart():
+ def restart():
     '''
     Toma el control del juego, navega el menu, escoje un mapa y crea la mascara de este.
 
@@ -27,6 +27,10 @@ def restart():
     #   -seleccionar restart
     #   -esperar un momento (~1 seg) antes de crear map (para evitar que la animacion del menu afecten la mascara)
     ##
+    tap('menu')
+    tap('down')
+    tap('swing')
+
 
     empty = Map(0, )
     screenshot = observation(empty, raw=True)
@@ -54,9 +58,16 @@ def step(action, map: Map):
     done = False
     restart = False  # Flag that signals whenever either the player's or the enemy's lives have reached 0, hence requiring to restart
     
-    ##
-    # perform action
-    ##
+   # assign to every number of action a key for execute the code. I think this can be automatized.
+    dict_actions={0:'left', 1:'left', 2:'right', 3:'right', 4:'up', 5:'up', 6: 'down', 7:'down', 8:'jump', 9:'jump',10: swing}
+
+    # split between 0 n' 1 if action is odd or even, even is release, odd is press
+    if action == 10:
+        tap (dict_actions[action]))
+    if action % 2 == 1:
+        press(dict_actions[action])
+    elif action % 2 == 0:
+        release(dict_actions[action])
 
     new_state, raw_ = observation(map)
 
@@ -80,6 +91,7 @@ def step(action, map: Map):
 
     if (current_p_lives == 0) or (current_e_lives == 0):
         restart = True
+
 
     return new_state, reward, done, restart
 
