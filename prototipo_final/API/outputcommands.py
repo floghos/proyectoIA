@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 #import threading
 from pynput.keyboard import Controller, Key
-
+from time import sleep
 kb = Controller()
 key_dict = {'left':'a', 'right':'d', 'up':'w', 'down':'s', 'jump':'j', 'swing':'k', 'shoot':'l', 'menu': Key.esc}
 
@@ -45,7 +44,9 @@ def tap(key):
     # time.sleep(delay)
     if key in key_dict.keys():
         #print ('tapping', key)
-        kb.tap(key_dict[key])
+        kb.press(key_dict[key])
+        sleep(0.05)
+        kb.release(key_dict[key])
     else:
         try:
             kb.tap(key)
