@@ -27,19 +27,16 @@ def stack_frames(stacked_frames, frame, buffer_size):
 
 
 if __name__ == '__main__':
-    #os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    #os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-    #os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
     env = gym.make('Breakout-v0')
     load_checkpoint = False  # change this to True if you want to resume previous training (I think?)
     agent = Agent(gamma=0.99, epsilon=1.0, alpha=0.000025, input_dims=(180, 160, 4),
                   n_actions=3, mem_size=4000, batch_size=64)
     if load_checkpoint:
         agent.load_models()
-    filename = 'breakout-alpha0p000025-gamma0p9-only-one-fc-2.png'
+    #filename = 'breakout-alpha0p000025-gamma0p9-only-one-fc-2.png'
     scores = []
     eps_history = []
-    numGames = 50000
+    numGames = 10000
     stack_size = 4
     score = 0
     # uncomment the line below to record every episode.
