@@ -1,7 +1,7 @@
 import cv2 as cv
 import numpy as np
-from .windowcapture import window_capture
-# from windowcapture import window_capture  #use when testing this module by itself
+#from .windowcapture import window_capture  # use this when running from main.py
+from windowcapture import window_capture  #use when testing this module by itself or from sg_api.py
 
 class Map:
     def __init__(self, offset, screenshot=None) -> None:
@@ -26,9 +26,6 @@ def lives(img):
     (21,8)      (21,15)
     (28,8)      (28,15)
     (35,8)      (35,15)
-
-   # Hay un problema porque hay que recordar que hay imagenes que van a tener medio bloque 
-   # de distancia  y esos son 8 pixeles creo. 
 
     For green characters leafs are on 208 in green intensity
     '''
@@ -71,7 +68,7 @@ def enemy_lives(img):
     count_enemy = len(locations_f)    
        
     #print('Enemy lives:', count_enemy)    
-    return(enemy_lv)
+    return count_enemy
 
 def map_mask(img) -> np.ndarray:
     '''Makes a matrix with boolean values, marking with 1 all tiles that are
