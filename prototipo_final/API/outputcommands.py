@@ -36,7 +36,18 @@ def release(key):
         # print("releasing ", key)
     else:
         try:
-            kb.press(key)
+            kb.release(key)
         except:
             print('No se pudo soltar "{}"'.format(key))
+
+def tap(key):
+    # time.sleep(delay)
+    if key in key_dict.keys():
+        kb.tap(key_dict[key])
+        # print ('tapping', key)
+    else:
+        try:
+            kb.tap(key)
+        except:
+            print('No se pudo hacer tap "{}"'.format(key))
     
