@@ -1,15 +1,15 @@
 import cv2 as cv
 import numpy as np
-from time import time
+import time
 
-from .inputpreprocess import observation, Map, lives, enemy_lives
-from .outputcommands import press, release, tap
+# from .inputpreprocess import observation, Map, lives, enemy_lives
+# from .outputcommands import press, release, tap
 
 # Use the 2 below instead of the 2 above when testing the module by itself
-# from inputpreprocess import observation, Map
-# from outputcommands import press, release
+from inputpreprocess import observation, Map, lives, enemy_lives
+from outputcommands import press, release, tap
 
- def restart():
+def restart():
     '''
     Toma el control del juego, navega el menu, escoje un mapa y crea la mascara de este.
 
@@ -27,9 +27,14 @@ from .outputcommands import press, release, tap
     #   -seleccionar restart
     #   -esperar un momento (~1 seg) antes de crear map (para evitar que la animacion del menu afecten la mascara)
     ##
+    WAIT = 0.0
     tap('menu')
+    time.sleep(WAIT)
     tap('down')
+    time.sleep(WAIT)
     tap('swing')
+    time.sleep(1)
+    print("sleep time's over")
 
 
     empty = Map(0, )
@@ -51,6 +56,9 @@ def reset(map: Map):
  
     return initial_state
 
+
+DELAY = 0.07
+
 def step(action, map: Map):
     raw = observation(map, raw=True)
     previous_p_lives = lives(raw)
@@ -58,17 +66,18 @@ def step(action, map: Map):
     done = False
     restart = False  # Flag that signals whenever either the player's or the enemy's lives have reached 0, hence requiring to restart
     
-   # assign to every number of action a key for execute the code. I think this can be automatized.
-    dict_actions={0:'left', 1:'left', 2:'right', 3:'right', 4:'up', 5:'up', 6: 'down', 7:'down', 8:'jump', 9:'jump',10: swing}
+    # assign to every number of action a key for execute the code. I think this can be automatized.
+    dict_actions={0:'left', 1:'left', 2:'right', 3:'right', 4:'up', 5:'up', 6: 'down', 7:'down', 8:'jump', 9:'jump', 10:'swing'}
 
     # split between 0 n' 1 if action is odd or even, even is release, odd is press
     if action == 10:
-        tap (dict_actions[action]))
-    if action % 2 == 1:
+        tap (dict_actions[action])
+    elif action % 2 == 1:
         press(dict_actions[action])
     elif action % 2 == 0:
         release(dict_actions[action])
-
+    
+    time.sleep(DELAY)
     new_state, raw_ = observation(map)
 
     current_p_lives = lives(raw_)
@@ -95,17 +104,25 @@ def step(action, map: Map):
 
     return new_state, reward, done, restart
 
-'''
-observation = env.reset() 
-# reinicia el ambiente y retorna un screenshot
+if __name__ == '__main__':
+    time.sleep(2)
+    restart()
+    # for i in range(5):
+    #     tap('swing')
+    #     time.sleep(0.3)
 
-observation_, reward, done, info = env.step(action) 
-# toma como parametro una accion del espacio de acciones, 
-# retorna:
-#  un screenshot del nuevo estado DESPUES de haber tomado la accion
-#  la recompenza por haber alcansado este nuevo estado
-#  un booleano indicando si se alcansó el fin del episodio
-#  información util para debug
- 
- 
-'''
+    # press('right')
+    # time.sleep(1)
+    # release('right')
+
+    # press('swing')
+    # time.sleep(0.1)
+    # release('swing')
+
+    # press('left')
+    # time.sleep(1)
+    # release('left')
+
+    # press('right')
+    # time.sleep(0.1)
+    # release('right')
