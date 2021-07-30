@@ -5,7 +5,7 @@ tf.disable_v2_behavior()
 import numpy as np
 
 class DeepQNetwork(object):
-    def __init__(self, lr, n_actions, name, fc1_dims=1024,
+    def __init__(self, lr, n_actions, name, fc1_dims=400,
                  input_dims=(210,160,4), chkpt_dir='tmp/dqn'):
         self.lr = lr
         self.n_actions = n_actions
@@ -49,8 +49,8 @@ class DeepQNetwork(object):
             conv3_activated = tf.nn.relu(conv3)
 
             flat = tf.layers.flatten(conv3_activated)
-            print('shape of "flat": ')
-            print(flat.shape)
+            # print('shape of "flat": ')
+            # print(flat.shape)
             dense1 = tf.layers.dense(flat, units=self.fc1_dims,
                                      activation=tf.nn.relu,
                     kernel_initializer=tf.variance_scaling_initializer(scale=2))
@@ -133,6 +133,7 @@ class Agent(object):
         terminal_batch = self.terminal_memory[batch]
 
         #estudiar esto 👀
+        #tenemos 2 DeepQNetworks y esto tiene una buena razón
         q_eval = self.q_eval.sess.run(self.q_eval.Q_values,
                                      feed_dict={self.q_eval.input: state_batch})
         q_next = self.q_next.sess.run(self.q_next.Q_values,
