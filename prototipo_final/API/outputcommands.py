@@ -2,7 +2,7 @@
 from pynput.keyboard import Controller, Key
 from time import sleep
 kb = Controller()
-key_dict = {'left':'a', 'right':'d', 'up':'w', 'down':'s', 'jump':'j', 'swing':'k', 'shoot':'l', 'menu': Key.esc}
+key_dict = {'left':'a', 'right':'d', 'up':'w', 'down':'s', 'jump':'j', 'swing':'k', 'shoot':'l', 'menu': Key.esc, 'back':'o'}
 
 delay = 0
 
