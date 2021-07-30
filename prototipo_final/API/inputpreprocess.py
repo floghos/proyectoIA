@@ -43,7 +43,7 @@ def lives(img):
     return(life)
 
 
-template = cv.imread("template_mini.bmp",0)
+TEMPLATE = cv.imread("prototipo_final/API/char_templates/template_mini.bmp",0)
 
 def enemy_lives(img):
     '''
@@ -55,13 +55,12 @@ def enemy_lives(img):
     '''
     gray_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)    
     count_enemy = 0
-         
+
     line=np.zeros((20,80),dtype='uint8')
     for fila in range(0,20):
         for col in range(0,80):
-            line[fila,col]=gray_img[fila+215, col+120]
-    enemy_lv = np.zeros((20,80),dtype='uint8')    
-    locations = cv.matchTemplate(line, template, cv.TM_CCOEFF_NORMED)
+            line[fila,col]=gray_img[fila+215, col+120]    
+    locations = cv.matchTemplate(line, TEMPLATE, cv.TM_CCOEFF_NORMED)
     thresh = 0.6
     locations_w = np.where(locations >= thresh)
     locations_f = list(zip(*locations_w[::-1]))    
@@ -90,9 +89,6 @@ def map_mask(img) -> np.ndarray:
 def observation(map: Map, raw=False):
     '''Returns a simplified view of the screen in a 20x15 nparray.
     If raw is given as True, the raw screenshot of the game is returned instead.
-
-
-    
     '''
     screenshot = window_capture('Samurai Gunn')
 
@@ -115,10 +111,12 @@ def observation(map: Map, raw=False):
     obs = np.zeros((15, 20))
     const = 10 # used for getting the classifying numbers to a range between 0 and 1 
     s_img = simplify_2(screenshot, offset=map.offset, mask=map.mask)
+    player_on_screen = False
     for x in range(15):
         for y in range(20):
             if tuple(s_img[x, y]) == PKC:
                 obs[x, y] = 5/const
+                player_on_screen = True
             if tuple(s_img[x, y]) == EKC:
                 obs[x, y] = 10/const
             if tuple(s_img[x, y]) == MKC:
@@ -126,7 +124,7 @@ def observation(map: Map, raw=False):
             if tuple(s_img[x, y]) == (0, 0, 0):
                 obs[x, y] = 1/const
             
-    return obs, screenshot
+    return obs, screenshot, player_on_screen
 
 def simplify_2(img, offset=0, mask=None):
     '''Reduces the input image resolution by classifying the tiles on the screen and 
@@ -211,10 +209,19 @@ def classify_tile_2(x, y, img, sliced):
     result = keys[index]
     return result
 
-PLAYER_TEMP_R = cv.imread('char_templates/splinter_needle_r.jpg')
-PLAYER_TEMP_L = cv.imread('char_templates/splinter_needle_l.jpg')
-ENEMY_TEMP_GREEN = cv.imread('char_templates/ninja_needle_green.jpg')
-ENEMY_TEMP_CYAN = cv.imread('char_templates/ninja_cyan.png')
+
+PLAYER_TEMP_R = cv.imread(
+    'prototipo_final/API/char_templates/splinter_needle_r.jpg')
+print(PLAYER_TEMP_R)
+PLAYER_TEMP_L = cv.imread(
+    'prototipo_final/API/char_templates/splinter_needle_l.jpg')
+print(PLAYER_TEMP_L)
+ENEMY_TEMP_GREEN = cv.imread(
+    'prototipo_final/API/char_templates/ninja_needle_green.jpg')
+print(ENEMY_TEMP_GREEN)
+ENEMY_TEMP_CYAN = cv.imread(
+    'prototipo_final/API/char_templates/ninja_cyan.png')
+print(ENEMY_TEMP_CYAN)
 
 # This is just here for reference. Used in cv.matchTemplate()
 # METHODS = ['cv.TM_CCOEFF', 'cv.TM_CCOEFF_NORMED', 'cv.TM_CCORR',
@@ -366,17 +373,3 @@ if __name__ == '__main__':
         if cv.waitKey(1) & 0xFF == ord('q'):
             cv.destroyAllWindows() 
             break
-    
-    # obs = observation(map)
-    # render(obs)
-    # if cv.waitKey(0) & 0xFF == ord('q'):
-    #     cv.destroyAllWindows()
-    # #showing mask
-    # temp = map.mask
-    # for x in range(15):
-    #     for y in range(20):
-    #         temp[x,y] = temp[x,y] * 255
-    
-    # dim = (temp.shape[1] * 16, temp.shape[0] * 16)
-    # img_ = cv.resize(temp, dim, interpolation=cv.INTER_AREA)
-    # cv.imshow('Mask', img_)
