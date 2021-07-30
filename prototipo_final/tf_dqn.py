@@ -33,24 +33,24 @@ class DeepQNetwork(object):
                                            shape=[None, self.n_actions],
                                            name='q_value')
 
-            conv1 = tf.layers.conv2d(inputs=self.input, filters=32,
-                                     kernel_size=(8,8), strides=4, name='conv1',
-                     kernel_initializer=tf.variance_scaling_initializer(scale=2))
-            conv1_activated = tf.nn.relu(conv1)
+            # conv1 = tf.layers.conv2d(inputs=self.input, filters=32,
+            #                          kernel_size=(8,8), strides=4, name='conv1',
+            #          kernel_initializer=tf.variance_scaling_initializer(scale=2))
+            # conv1_activated = tf.nn.relu(conv1)
 
+            # conv2 = tf.layers.conv2d(inputs=conv1_activated, filters=64,
+            #                          kernel_size=(4,4), strides=2, name='conv2',
+            #           kernel_initializer=tf.variance_scaling_initializer(scale=2))
+            # conv2_activated = tf.nn.relu(conv2)
 
-            conv2 = tf.layers.conv2d(inputs=conv1_activated, filters=64,
-                                     kernel_size=(4,4), strides=2, name='conv2',
-                      kernel_initializer=tf.variance_scaling_initializer(scale=2))
-            conv2_activated = tf.nn.relu(conv2)
-
-
-            conv3 = tf.layers.conv2d(inputs=conv2_activated, filters=128,
+            conv3 = tf.layers.conv2d(inputs=self.input, filters=16,
                                      kernel_size=(3,3),strides=1, name='conv3',
                       kernel_initializer=tf.variance_scaling_initializer(scale=2))
             conv3_activated = tf.nn.relu(conv3)
 
             flat = tf.layers.flatten(conv3_activated)
+            print('shape of "flat": ')
+            print(flat.shape)
             dense1 = tf.layers.dense(flat, units=self.fc1_dims,
                                      activation=tf.nn.relu,
                     kernel_initializer=tf.variance_scaling_initializer(scale=2))
@@ -126,12 +126,13 @@ class Agent(object):
 
         state_batch = self.state_memory[batch]
         action_batch = self.action_memory[batch]
-        action_values = np.array([0, 1, 2], dtype=np.int8)
+        action_values = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], dtype=np.int8)
         action_indices = np.dot(action_batch, action_values)
         reward_batch = self.reward_memory[batch]
         new_state_batch = self.new_state_memory[batch]
         terminal_batch = self.terminal_memory[batch]
 
+        #estudiar esto 👀
         q_eval = self.q_eval.sess.run(self.q_eval.Q_values,
                                      feed_dict={self.q_eval.input: state_batch})
         q_next = self.q_next.sess.run(self.q_next.Q_values,

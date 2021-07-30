@@ -1,26 +1,44 @@
 import cv2 as cv
 import numpy as np
-import time
+from time import sleep
 
-# from .inputpreprocess import observation, Map, lives, enemy_lives
-# from .outputcommands import press, release, tap
+from .inputpreprocess import observation, Map, lives, enemy_lives
+from .outputcommands import press, release, tap
 
 # Use the 2 below instead of the 2 above when testing the module by itself
-from inputpreprocess import observation, Map, lives, enemy_lives
-from outputcommands import press, release, tap
+# from inputpreprocess import observation, Map, lives, enemy_lives
+# from outputcommands import press, release, tap
+def setup() -> Map:
+    ''' 
+    Crea el mapa con la mascara y el offst a utilizar y lo devuelve en la estructura Map 
+
+    ## Note: As for now, offset is hardcoded as 0
+
+    Returns: Map
+    '''
+    ##
+    # Esta funcion debe hacer, en orden de importancia
+    # - seleccionar mapa
+    # - seleccionar personaje
+    # - configurar controles
+    ##
+
+    # selecting map and difficulty
+    tap('swing')
+    for i in range(5):
+        tap('down')
+    tap('swing')
+    sleep(1)
+
+    empty = Map(0, )
+    screenshot = observation(empty, raw=True)
+    map = Map(0, screenshot)
+    return map
 
 def restart():
     '''
-    Toma el control del juego, navega el menu, escoje un mapa y crea la mascara de este.
-
-    Returns:
-    Map (contiene la mascara del mapa seleccionado y su offset)
+    Abre el menu de pausa para reiniciar la partida en caso de que el jugador o el enemigo se le acaben las vidass
     '''
-    #secuencia de inputs para navegar el juego (opcional)
-    # - configurar controles
-    # - seleccionar personaje
-    # - seleccionar mapa
-
     ##
     # Como minimo debemos:
     #   -presionar start
@@ -29,18 +47,13 @@ def restart():
     ##
     WAIT = 0.0
     tap('menu')
-    time.sleep(WAIT)
+    sleep(WAIT)
     tap('down')
-    time.sleep(WAIT)
+    sleep(WAIT)
     tap('swing')
-    time.sleep(1)
-    print("sleep time's over")
-
-
-    empty = Map(0, )
-    screenshot = observation(empty, raw=True)
-    map = Map(0, screenshot)
-    return map
+    sleep(1)
+    #print("sleep time's over")
+ 
 
 def reset(map: Map):
     '''
@@ -71,13 +84,13 @@ def step(action, map: Map):
 
     # split between 0 n' 1 if action is odd or even, even is release, odd is press
     if action == 10:
-        tap (dict_actions[action])
+        tap(dict_actions[action])
     elif action % 2 == 1:
         press(dict_actions[action])
     elif action % 2 == 0:
         release(dict_actions[action])
     
-    time.sleep(DELAY)
+    sleep(DELAY)
     new_state, raw_ = observation(map)
 
     current_p_lives = lives(raw_)
@@ -85,8 +98,8 @@ def step(action, map: Map):
     p_lives_diff = current_p_lives - previous_p_lives
     e_lives_diff = current_e_lives - previous_e_lives
 
+    # Defining rewards
     reward = 0.0
-
     if e_lives_diff == -1:
         reward += 1
         done = True
@@ -105,24 +118,24 @@ def step(action, map: Map):
     return new_state, reward, done, restart
 
 if __name__ == '__main__':
-    time.sleep(2)
+    sleep(2)
     restart()
     # for i in range(5):
     #     tap('swing')
-    #     time.sleep(0.3)
+    #     sleep(0.3)
 
     # press('right')
-    # time.sleep(1)
+    # sleep(1)
     # release('right')
 
     # press('swing')
-    # time.sleep(0.1)
+    # sleep(0.1)
     # release('swing')
 
     # press('left')
-    # time.sleep(1)
+    # sleep(1)
     # release('left')
 
     # press('right')
-    # time.sleep(0.1)
+    # sleep(0.1)
     # release('right')

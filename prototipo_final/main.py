@@ -3,9 +3,8 @@ import gym
 from tf_dqn import DeepQNetwork, Agent
 # from utils import plotLearning
 import numpy as np
-from gym import wrappers
 import matplotlib.pyplot as plt
-from API.sg_api import reset
+import API.sg_api as api
 
 def preprocess(observation):
     observation = observation / 255
@@ -27,21 +26,22 @@ def stack_frames(stacked_frames, frame, buffer_size):
 
 
 if __name__ == '__main__':
-    env = gym.make('Breakout-v0')
+    #env = gym.make('Breakout-v0')
     load_checkpoint = False  # change this to True if you want to resume previous training (I think?)
-    agent = Agent(gamma=0.99, epsilon=1.0, alpha=0.000025, input_dims=(180, 160, 4),
-                  n_actions=3, mem_size=4000, batch_size=64)
+    STACK_SIZE = 4
+    SG_DIMS = (20, 15, STACK_SIZE)
+    #original input_dims = (180, 160, 4)
+    agent = Agent(gamma=0.99, epsilon=1.0, alpha=0.00005, input_dims=SG_DIMS,
+                  n_actions=11, mem_size=4000, batch_size=64)
     if load_checkpoint:
         agent.load_models()
     #filename = 'breakout-alpha0p000025-gamma0p9-only-one-fc-2.png'
     scores = []
     eps_history = []
-    numGames = 10000
-    stack_size = 4
+    numGames = 10000 
     score = 0
-    # uncomment the line below to record every episode.
-    #env = wrappers.Monitor(env, "tmp/breakout-0",
-    #                         video_callable=lambda episode_id: True, force=True)
+    map = api.setup()
+
     """
     print("Loading up the agent's memory with random gameplay")
 
@@ -50,47 +50,52 @@ if __name__ == '__main__':
         observation = env.reset()
         observation = preprocess(observation)
         stacked_frames = None
-        observation = stack_frames(stacked_frames, observation, stack_size)
+        observation = stack_frames(stacked_frames, observation, STACK_SIZE)
         while not done:
             action = np.random.choice([0, 1, 2])
             action += 1
             observation_, reward, done, info = env.step(action)
             observation_ = stack_frames(stacked_frames,
-                                        preprocess(observation_), stack_size)
+                                        preprocess(observation_), STACK_SIZE)
             action -= 1
             agent.store_transition(observation, action,
                                    reward, observation_, int(done))
             observation = observation_
     print("Done with random gameplay. Game on.")
     """
+    EPISODES_PER_SAVE = 10
+    MAX_STEPS = 101
     n_steps = 0
+
     for i in range(numGames):
         done = False
         #if i % 100 == 0 and i > 0:
         #    x = [j+1 for j in range(i)]
-
         #    plotLearning(x, scores, eps_history, filename)
-        observation = env.reset()
-        observation = preprocess(observation)
+        observation = api.reset()
         stacked_frames = None
-        observation = stack_frames(stacked_frames, observation, stack_size)
+        observation = stack_frames(stacked_frames, observation, STACK_SIZE)
         score = 0
-        while not done:
+        restart = False
+        while not done and n_steps < MAX_STEPS:
             action = agent.choose_action(observation)
-            action += 1
-            observation_, reward, done, info = env.step(action)
+            #action += 1
+            observation_, reward, done, restart = api.step(action, map)
             n_steps += 1
             observation_ = stack_frames(stacked_frames,
-                                        preprocess(observation_), stack_size)
+                                        observation_, STACK_SIZE)
             score += reward
-            action -= 1
             agent.store_transition(observation, action,
                                    reward, observation_, int(done))
             observation = observation_
             if n_steps % 4 == 0:
                 agent.learn()
-        if i % 12 == 0 and i > 0:
-            avg_score = np.mean(scores[max(0, i-12):(i+1)])
+
+        if restart:
+            api.restart()
+
+        if i % EPISODES_PER_SAVE == 0 and i > 0:
+            avg_score = np.mean(scores[max(0, i-EPISODES_PER_SAVE):(i+1)])
             print('episode: ', i, 'score: ', score,
                   ' average score %.3f' % avg_score,
                   'epsilon %.3f' % agent.epsilon)
