@@ -1,7 +1,7 @@
 import cv2 as cv
 import numpy as np
-#from .windowcapture import window_capture  # use this when running from main.py
-from windowcapture import window_capture  #use when testing this module by itself or from sg_api.py
+from .windowcapture import window_capture  # use this when running from main.py
+# from windowcapture import window_capture  #use when testing this module by itself or from sg_api.py
 
 class Map:
     def __init__(self, offset, screenshot=None) -> None:
