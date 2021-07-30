@@ -28,14 +28,16 @@ def setup() -> Map:
     for i in range(5):
         tap('down')
     tap('swing')
-    sleep(1)
 
     empty = Map(0, )
     screenshot = observation(empty, raw=True)
     map = Map(0, screenshot)
     return map
 
-def restart():
+def pause() -> None:
+    tap('menu')
+
+def restart() -> None:
     '''
     Abre el menu de pausa para reiniciar la partida en caso de que el jugador o el enemigo se le acaben las vidass
     '''
@@ -45,14 +47,17 @@ def restart():
     #   -seleccionar restart
     #   -esperar un momento (~1 seg) antes de crear map (para evitar que la animacion del menu afecten la mascara)
     ##
-    WAIT = 0.0
+    WAIT = 0.1
     tap('menu')
     sleep(WAIT)
     tap('down')
     sleep(WAIT)
     tap('swing')
-    sleep(1)
-    #print("sleep time's over")
+    # sleep(1)
+    # tap('menu')
+    # sleep(1.5)
+    # tap('menu')
+    print("sleep time's over")
  
 
 def reset(map: Map):
@@ -65,9 +70,9 @@ def reset(map: Map):
     Returns:
         ndarray (simplified screenshot)
     '''
-    initial_state, _ = observation(map)
+    initial_state, _ , start = observation(map)
  
-    return initial_state
+    return initial_state, start
 
 
 DELAY = 0.07
@@ -76,6 +81,9 @@ def step(action, map: Map):
     raw = observation(map, raw=True)
     previous_p_lives = lives(raw)
     previous_e_lives = enemy_lives(raw)
+
+    print(f'{previous_p_lives = }, {previous_e_lives = }')
+
     done = False
     restart = False  # Flag that signals whenever either the player's or the enemy's lives have reached 0, hence requiring to restart
     
@@ -91,7 +99,7 @@ def step(action, map: Map):
         release(dict_actions[action])
     
     sleep(DELAY)
-    new_state, raw_ = observation(map)
+    new_state, raw_, _ = observation(map)
 
     current_p_lives = lives(raw_)
     current_e_lives = enemy_lives(raw_)
