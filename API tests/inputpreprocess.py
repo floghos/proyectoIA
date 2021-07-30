@@ -21,10 +21,7 @@ def lives(img):
     (14,8)      (14,15)
     (21,8)      (21,15)
     (28,8)      (28,15)
-    (35,8)      (35,15)
-
-   # Hay un problema porque hay que recordar que hay imagenes que van a tener medio bloque 
-   # de distancia  y esos son 8 pixeles creo. 
+    (35,8)      (35,15) 
 
     For green characters leafs are on 208 in green intensity
     '''
@@ -55,19 +52,19 @@ def enemy_lives(img):
     gray_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)    
     count_enemy = 0
          
-    line=np.zeros((20,80),dtype='uint8')
+    enemy_lv=np.zeros((20,80),dtype='uint8')
     for fila in range(0,20):
         for col in range(0,80):
-            line[fila,col]=gray_img[fila+215, col+120]
-    enemy_lv = np.zeros((20,80),dtype='uint8')    
-    locations = cv.matchTemplate(line, template, cv.TM_CCOEFF_NORMED)
+            enemy_lv[fila,col]=gray_img[fila+215, col+120] 
+
+    locations = cv.matchTemplate(enemy_lv, template, cv.TM_CCOEFF_NORMED)
     thresh = 0.6
     locations_w = np.where(locations >= thresh)
     locations_f = list(zip(*locations_w[::-1]))    
     count_enemy = len(locations_f)    
        
-    print('Enemy lives:', count_enemy)    
-    return(enemy_lv)
+    # print('Enemy lives:', count_enemy)    
+    return(count_enemy)
 
 def map_mask(img):
     '''Makes a matrix with boolean values, marking with 1 all tiles that are
