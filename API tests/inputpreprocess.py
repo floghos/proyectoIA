@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Jun 11 00:58:15 2021
-
-@author: caleu
-"""
 import cv2 as cv
 import numpy as np
 
@@ -65,6 +59,67 @@ def enemy_lives(img):
        
     # print('Enemy lives:', count_enemy)    
     return(count_enemy)
+
+def enemy_lives_2(img) -> int:
+    img2 = img.copy()
+    area = img2[217:232, 123:197, :3]
+    #area_backup = area.copy()
+    # Yes, these 2 inner functions are almost identical... and yes, they could be made into a single one 
+    # but I think this way it's more understandable, so for now I'll just leave it like this     
+    def checkLeft(t:int) -> bool:
+        #area = area_backup
+        t = 5 - t
+        origin1 = (217, 123 + 8*t)
+
+        px_set = ((0,4), (6,0), (14,4))
+        #print(f'{origin1 = }')
+        for p in px_set:
+            #print(f'{p = }')
+            p_aux = (p[0], p[1] + 8*t)
+            area[p_aux] = [0, 0, 255]
+            cv.imshow('Area', area)
+            coords = (origin1[0] + p[0], origin1[1] + p[1])
+            #print(f'{coords = }')
+            pixel = img[coords]
+            pixel = tuple(pixel[:3])
+            #print(f'{pixel=}')
+            if pixel != (255, 255, 255):
+                #print(f"LEFT check {t} -> false\n")
+                return False
+        #print(f"LEFT check {t} -> true\n")
+        return True
+
+    def checkRight(t:int) -> bool:
+        t = 5 - t
+        origin2 = (217, 196 - 8*t)
+        #print(f'{origin2 = }')
+        px_set = ((0,-4), (6,0), (14,-4))
+        k = 1
+        for p in px_set:
+            #print(f'{p = }')
+            p_aux = (0+p[0], 73 + p[1] - 8*t)
+            area[p_aux] = [100, 100, 255]
+            k += 1
+            cv.imshow('Area', area)
+            coords = (origin2[0] + p[0], origin2[1] + p[1])
+            #print(f'{coords = }')
+            pixel = img[coords]
+            pixel = tuple(pixel[:3])
+            #print(f'{pixel = }')
+            if pixel != (255, 255, 255):
+                #print(f"RIGHT check {t} -> false\n")
+                return False
+        #print(f"RIGHT check {t} -> true\n")
+        return True
+
+    
+    for i in range(5):
+        l = 5 - i
+        #this ask the question: does the enemy have l lives?
+        if checkLeft(l) and checkRight(l):
+            return l
+            
+    return 0
 
 def map_mask(img):
     '''Makes a matrix with boolean values, marking with 1 all tiles that are

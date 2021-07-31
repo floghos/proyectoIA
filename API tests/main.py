@@ -2,9 +2,34 @@ import cv2 as cv
 import numpy as np
 from time import time
 from windowcapture import window_capture
-from inputpreprocess import simplify_2, map_mask, lives, enemy_lives
+from inputpreprocess import simplify_2, map_mask, lives, enemy_lives, enemy_lives_2
 
 
+if __name__ == "__main__":     
+    '''
+    img = window_capture('Samurai Gunn')
+    p_lives = lives(img)
+    e_lives = enemy_lives_2(img)
+
+    print(f'{p_lives = }, {e_lives = }')
+
+    if cv.waitKey(0) & 0xFF == ord('q'):
+        cv.destroyAllWindows()
+    '''
+        
+    while True:
+        img = window_capture('Samurai Gunn')
+        p_lives = lives(img)
+        e_lives = enemy_lives_2(img)
+
+        print(f'{p_lives = }, {e_lives = }')
+
+        if cv.waitKey(10) & 0xFF == ord('q'):
+            cv.destroyAllWindows()
+            break
+    
+
+'''
 if __name__ == "__main__":      
     frame_count = 1
     cumulative_fps = 0
@@ -59,3 +84,4 @@ if __name__ == "__main__":
             cv.destroyAllWindows()
             break
     
+'''
