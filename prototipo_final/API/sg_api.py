@@ -2,12 +2,14 @@ import cv2 as cv
 import numpy as np
 from time import sleep
 
-from .inputpreprocess import observation, Map, lives, enemy_lives
+from .inputpreprocess import observation, Map, lives, enemy_lives, enemy_lives_2
 from .outputcommands import press, release, tap
 
 # Use the 2 below instead of the 2 above when testing the module by itself
 # from inputpreprocess import observation, Map, lives, enemy_lives
 # from outputcommands import press, release, tap
+
+
 def setup() -> Map:
     ''' 
     Crea el mapa con la mascara y el offst a utilizar y lo devuelve en la estructura Map 
@@ -70,20 +72,19 @@ def reset(map: Map):
     Returns:
         ndarray (simplified screenshot)
     '''
-    initial_state, _ , start = observation(map)
- 
+    initial_state, raw_ , start = observation(map)
+    starting_p_lives = lives(raw_)
+    starting_e_lives = enemy_lives_2(raw_)
+
+    map.p_lives = starting_p_lives
+    map.e_lives = starting_e_lives
+
     return initial_state, start
 
 
-DELAY = 0.07
+DELAY = 0.1
 
 def step(action, map: Map):
-    raw = observation(map, raw=True)
-    previous_p_lives = lives(raw)
-    previous_e_lives = enemy_lives(raw)
-
-    print(f'{previous_p_lives = }, {previous_e_lives = }')
-
     done = False
     restart = False  # Flag that signals whenever either the player's or the enemy's lives have reached 0, hence requiring to restart
     
@@ -102,9 +103,12 @@ def step(action, map: Map):
     new_state, raw_, _ = observation(map)
 
     current_p_lives = lives(raw_)
-    current_e_lives = enemy_lives(raw_)
-    p_lives_diff = current_p_lives - previous_p_lives
-    e_lives_diff = current_e_lives - previous_e_lives
+    current_e_lives = enemy_lives_2(raw_)
+
+    #print(f'{current_p_lives = }, {current_e_lives = }')
+
+    p_lives_diff = current_p_lives - map.p_lives
+    e_lives_diff = current_e_lives - map.e_lives
 
     # Defining rewards
     reward = 0.0
@@ -122,7 +126,8 @@ def step(action, map: Map):
     if (current_p_lives == 0) or (current_e_lives == 0):
         restart = True
 
-
+    map.p_lives = current_p_lives
+    map.e_lives = current_e_lives
     return new_state, reward, done, restart
 
 if __name__ == '__main__':

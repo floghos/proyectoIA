@@ -6,6 +6,8 @@ from .windowcapture import window_capture  # use this when running from main.py
 class Map:
     def __init__(self, offset, screenshot=None) -> None:
         self.offset = offset
+        self.e_lives = 0
+        self.p_lives = 0
         if screenshot is None:
             self.mask = None
         else:
@@ -56,18 +58,56 @@ def enemy_lives(img):
     gray_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)    
     count_enemy = 0
 
-    line=np.zeros((20,80),dtype='uint8')
-    for fila in range(0,20):
-        for col in range(0,80):
-            line[fila,col]=gray_img[fila+215, col+120]    
+    line=np.zeros((30,100),dtype='uint8')
+    for fila in range(0,30):
+        for col in range(0,100):
+            line[fila,col]=gray_img[fila+210, col+110]    
     locations = cv.matchTemplate(line, TEMPLATE, cv.TM_CCOEFF_NORMED)
-    thresh = 0.6
+    thresh = 0.3
     locations_w = np.where(locations >= thresh)
     locations_f = list(zip(*locations_w[::-1]))    
     count_enemy = len(locations_f)    
        
     #print('Enemy lives:', count_enemy)    
     return count_enemy
+
+
+def enemy_lives_2(img) -> int:
+    img2 = img.copy()
+    # Yes, these 2 inner functions are almost identical... and yes, they could be made into a single one
+    # but I think this way it's more understandable, so for now I'll just leave it like this
+
+    def checkLeft(t: int) -> bool:
+        t = 5 - t
+        origin1 = (217, 123 + 8*t)
+        px_set = ((0, 4), (6, 0), (14, 4))
+        for p in px_set:
+            coords = (origin1[0] + p[0], origin1[1] + p[1])
+            pixel = img[coords]
+            pixel = tuple(pixel[:3])
+            if pixel != (255, 255, 255):
+                return False
+        return True
+
+    def checkRight(t: int) -> bool:
+        t = 5 - t
+        origin2 = (217, 196 - 8*t)
+        px_set = ((0, -4), (6, 0), (14, -4))
+        for p in px_set:
+            coords = (origin2[0] + p[0], origin2[1] + p[1])
+            pixel = img[coords]
+            pixel = tuple(pixel[:3])
+            if pixel != (255, 255, 255):
+                return False
+        return True
+
+    for i in range(5):
+        l = 5 - i
+        #this ask the question: does the enemy have l lives?
+        if checkLeft(l) and checkRight(l):
+            return l
+
+    return 0
 
 def map_mask(img) -> np.ndarray:
     '''Makes a matrix with boolean values, marking with 1 all tiles that are
@@ -212,16 +252,16 @@ def classify_tile_2(x, y, img, sliced):
 
 PLAYER_TEMP_R = cv.imread(
     'prototipo_final/API/char_templates/splinter_needle_r.jpg')
-print(PLAYER_TEMP_R)
+#print(PLAYER_TEMP_R)
 PLAYER_TEMP_L = cv.imread(
     'prototipo_final/API/char_templates/splinter_needle_l.jpg')
-print(PLAYER_TEMP_L)
+#print(PLAYER_TEMP_L)
 ENEMY_TEMP_GREEN = cv.imread(
     'prototipo_final/API/char_templates/ninja_needle_green.jpg')
-print(ENEMY_TEMP_GREEN)
+#print(ENEMY_TEMP_GREEN)
 ENEMY_TEMP_CYAN = cv.imread(
     'prototipo_final/API/char_templates/ninja_cyan.png')
-print(ENEMY_TEMP_CYAN)
+#print(ENEMY_TEMP_CYAN)
 
 # This is just here for reference. Used in cv.matchTemplate()
 # METHODS = ['cv.TM_CCOEFF', 'cv.TM_CCOEFF_NORMED', 'cv.TM_CCORR',
