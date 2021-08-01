@@ -39,9 +39,16 @@ if __name__ == '__main__':
     EPISODES_PER_SAVE = 50
     MAX_STEPS = 100
     for i in range(numGames):
-        #if i % 100 == 0 and i > 0:
-        #    x = [j+1 for j in range(i)]
-        #    plotLearning(x, scores, eps_history, filename)
+        ep_stack_counter=0
+        if i % 10 == 0 and i > 0:
+            ep_stack_counter+=1
+            x = [j+1 for j in range(i)]
+            plt.figure()
+            plt.plot(x, scores)     # plot rewards
+            plt.plot(x,eps_history) # plot epsilon history
+            plt.xlabel(' number of episodes'), plt.ylabel('scores and epsilon')
+            plt.title('Learning per 100, stack '+ str(ep_stack_counter))
+            plt.show()
         observation = None
         start = False
         while not start:
@@ -113,5 +120,12 @@ if __name__ == '__main__':
         scores.append(score)
         sleep(1)    
 
-    # x = [i+1 for i in range(numGames)]
-    # plotLearning(x, scores, eps_history, filename)
+        # plotting scores and epsilon
+        x = [i+1 for i in range(numGames)]
+        plt.figure()
+        plt.plot(x, scores)     # plot rewards
+        plt.plot(x,eps_history) # plot epsilon history
+        plt.xlabel(' number of episodes'), plt.ylabel('scores and epsilon')
+        plt.title('Learning graph')
+        plt.show
+
