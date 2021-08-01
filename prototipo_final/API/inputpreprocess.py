@@ -251,22 +251,17 @@ def classify_tile_2(x, y, img, sliced):
 
 
 PLAYER_TEMP_R = cv.imread(
-    'prototipo_final/API/char_templates/splinter_needle_r.jpg')
-#print(PLAYER_TEMP_R)
+    'prototipo_final/API/char_templates/splinter_needle_r_new.png')
 PLAYER_TEMP_L = cv.imread(
-    'prototipo_final/API/char_templates/splinter_needle_l.jpg')
-#print(PLAYER_TEMP_L)
+    'prototipo_final/API/char_templates/splinter_needle_l_new.png')
 ENEMY_TEMP_GREEN = cv.imread(
     'prototipo_final/API/char_templates/ninja_needle_green.jpg')
-#print(ENEMY_TEMP_GREEN)
 ENEMY_TEMP_CYAN = cv.imread(
     'prototipo_final/API/char_templates/ninja_cyan.png')
-#print(ENEMY_TEMP_CYAN)
 
 # This is just here for reference. Used in cv.matchTemplate()
 # METHODS = ['cv.TM_CCOEFF', 'cv.TM_CCOEFF_NORMED', 'cv.TM_CCORR',
 #            'cv.TM_CCORR_NORMED', 'cv.TM_SQDIFF', 'cv.TM_SQDIFF_NORMED']
-
 
 def find_players(x, y, img, sliced):
     '''Used to find the characters within a tile.
@@ -370,7 +365,7 @@ def find_players(x, y, img, sliced):
     else:
         return (255, 255, 255)
 
-def render(observation):
+def renderObs(observation):
     img = np.zeros((15, 20, 3))
     const = 10
     for x in range(15):
@@ -396,9 +391,9 @@ def render(observation):
     dim = (img.shape[1] * 16, img.shape[0] * 16)
     img = cv.resize(img, dim, interpolation=cv.INTER_AREA)
     cv.imshow('Computer Vision', img)
-    print('Remember to take care of this if statement. cv.destroyAllWindows does not need to be called in this very function')
-    if cv.waitKey(0) & 0xFF == ord('q'):
-        cv.destroyAllWindows()
+    # print('Remember to take care of this if statement. cv.destroyAllWindows does not need to be called in this very function')
+    # if cv.waitKey(0) & 0xFF == ord('q'):
+    #     cv.destroyAllWindows()
 
 #import os
 #when testing with this main routine, remember to check the path of the terminal that's running this
@@ -409,7 +404,7 @@ if __name__ == '__main__':
     
     while True:
         obs = observation(map)        
-        render(obs)
+        renderObs(obs)
         if cv.waitKey(1) & 0xFF == ord('q'):
             cv.destroyAllWindows() 
             break
