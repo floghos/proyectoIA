@@ -1,6 +1,7 @@
 Repositorio para el proyecto semestral de IA 
-yes yes claro que yes
+El objetivo es crear un agente inteligente que sea capaz de jugar Samurai Gunn 
 
+yes yes claro que yes
 
 Sources:
 https://datascience.stackexchange.com/questions/37633/is-nn-with-no-hidden-layer-is-behave-like-a-regression
