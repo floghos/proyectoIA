@@ -148,7 +148,7 @@ def observation(map: Map, raw=False):
     MKC = tuple(aux)
 
     
-    obs = np.zeros((15, 20))
+    obs = np.zeros((15, 20), dtype=np.float16)
     const = 10 # used for getting the classifying numbers to a range between 0 and 1 
     s_img = simplify_2(screenshot, offset=map.offset, mask=map.mask)
     player_on_screen = False
@@ -379,11 +379,11 @@ def renderObs(observation):
                 #enemy
                 img[x, y] = (0, 0, 255)
                 continue
-            if observation[x, y] == 7/const:
+            if observation[x, y] == np.float16(7/const):
                 #player&enemy
                 img[x, y] = (0, 255, 255)
                 continue
-            if observation[x, y] == 1/const:
+            if observation[x, y] == np.float16(1/const):
                 #solid block
                 img[x, y] = (0, 0, 0)
                 continue

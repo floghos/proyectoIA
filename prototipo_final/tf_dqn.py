@@ -6,7 +6,7 @@ import numpy as np
 
 class DeepQNetwork(object):
     def __init__(self, lr, n_actions, name, fc1_dims=400,
-                 input_dims=(210,160,4), chkpt_dir='tmp/dqn'):
+                 input_dims=(15,20,4), chkpt_dir='tmp/dqn'):
         self.lr = lr
         self.n_actions = n_actions
         self.name = name
@@ -74,7 +74,7 @@ class DeepQNetwork(object):
 
 class Agent(object):
     def __init__(self, alpha, gamma, mem_size, n_actions, epsilon, batch_size,
-                 replace_target=10000, input_dims=(210,160,4),
+                 replace_target=10000, input_dims=(15,20,4),
                  q_next_dir='tmp/q_next', q_eval_dir='tmp/q_eval'):
         self.action_space = [i for i in range(n_actions)]
         self.n_actions = n_actions
@@ -88,8 +88,10 @@ class Agent(object):
                                    name='q_next', chkpt_dir=q_next_dir)
         self.q_eval = DeepQNetwork(alpha, n_actions, input_dims=input_dims,
                                    name='q_eval', chkpt_dir=q_eval_dir)
-        self.state_memory = np.zeros((self.mem_size, *input_dims))
-        self.new_state_memory = np.zeros((self.mem_size, *input_dims))
+        self.state_memory = np.zeros((self.mem_size, *input_dims), 
+                                    dtype=np.float16)
+        self.new_state_memory = np.zeros((self.mem_size, *input_dims), 
+                                        dtype=np.float16)
         self.action_memory = np.zeros((self.mem_size, self.n_actions),
                                       dtype=np.int8)
         self.reward_memory = np.zeros(self.mem_size)
@@ -98,7 +100,7 @@ class Agent(object):
     def store_transition(self, state, action, reward, state_, terminal):
         index = self.mem_cntr % self.mem_size
         self.state_memory[index] = state
-        actions = np.zeros(self.n_actions)
+        actions = np.zeros(self.n_actions, dtype=np.int8)
         actions[action] = 1.0
         self.action_memory[index] = actions
         self.reward_memory[index] = reward
@@ -111,6 +113,7 @@ class Agent(object):
         if rand < self.epsilon:
             action = np.random.choice(self.action_space)
         else:
+            print('non random action!')
             actions = self.q_eval.sess.run(self.q_eval.Q_values,
                       feed_dict={self.q_eval.input: state} )
             action = np.argmax(actions)
@@ -152,7 +155,7 @@ class Agent(object):
                                    self.q_eval.actions: action_batch,
                                    self.q_eval.q_target: q_target})
 
-        if self.mem_cntr > 25000:#200000:
+        if self.mem_cntr > 2000:#200000:
             if self.epsilon > 0.05:
                 self.epsilon -= 4e-7
             elif self.epsilon <= 0.05:
