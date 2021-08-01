@@ -60,12 +60,14 @@ def restart() -> None:
 def reset(map: Map):
     '''
     This funcion is called when an episode has concluded.
-    It resets the environment and returns an initial observation (simplified screenshot).
+    It resets the environment and returns an initial observation (simplified screenshot), along with answering if 
+    the player is on screen, ready to play
     
     Parameters:
         Map
     Returns:
-        ndarray (simplified screenshot)
+        ndarray: 15x20 (simplified screenshot)
+        start: bool. Is a player on the screen?
     '''
     initial_state, raw_ , start = observation(map)
     starting_p_lives = lives(raw_)
@@ -109,13 +111,13 @@ def step(action, map: Map):
     # Defining rewards
     reward = 0.0
     if e_lives_diff == -1:
-        reward += 1
+        reward += 3
         done = True
     if p_lives_diff == -1:
         reward -= 1
         done = True
     if e_lives_diff - p_lives_diff == 0:
-        reward -= 0.01
+        reward -= 0.02
     if (current_p_lives == 0) or (current_e_lives == 0):
         restart = True
 
