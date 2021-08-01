@@ -1,9 +1,11 @@
-import os
-import gym
+#import os
+#import gym
+import cv2
 from tf_dqn import DeepQNetwork, Agent
 # from utils import plotLearning
 import numpy as np
 import matplotlib.pyplot as plt
+#from time import sleep
 import API.sg_api as api
 
 def stack_frames(stacked_frames, frame, buffer_size):
@@ -37,12 +39,11 @@ if __name__ == '__main__':
     score = 0
     map = api.setup()
 
-    EPISODES_PER_SAVE = 1000
-    MAX_STEPS = 201
-    n_steps = 0
+    
 
+    EPISODES_PER_SAVE = 50
+    MAX_STEPS = 150
     for i in range(numGames):
-        done = False
         #if i % 100 == 0 and i > 0:
         #    x = [j+1 for j in range(i)]
         #    plotLearning(x, scores, eps_history, filename)
@@ -51,15 +52,26 @@ if __name__ == '__main__':
         while not start:
             observation, start = api.reset(map)
         print('Player found, starting episode...')
+
         stacked_frames = None
         observation = stack_frames(stacked_frames, observation, STACK_SIZE)
+        
         score = 0
+        n_steps = 0
+        done = False
         restart = False
-        start = False
-            
+        # ---- Episode START ----
         while not done and n_steps < MAX_STEPS:
+            #print(f'{n_steps=}')
+            #print(f'{map.p_lives = }')
             action = agent.choose_action(observation)
             observation_, reward, done, restart = api.step(action, map)
+            # api.render(observation_)
+            # if cv2.waitKey(1) & 0xFF == ord('q'):
+            #     done = True
+            #     i = numGames+1
+            #     cv2.destroyAllWindows()
+            #     break
             n_steps += 1
             observation_ = stack_frames(stacked_frames,
                                         observation_, STACK_SIZE)
@@ -75,24 +87,31 @@ if __name__ == '__main__':
             observation = observation_
             if n_steps % 4 == 0:
                 agent.learn()
-            
+        # ---- Episode END ---- 
+       
+        # Very important to release all pressed keys after each episode
+        api.releaseAllKeys()
+
         if restart:
             print('Restarting...')
             api.restart()
 
         if i % EPISODES_PER_SAVE == 0 and i > 0:
-            print('pausing...')
+            print('Checkpoint reached. Pausing...')
             api.pause()
             avg_score = np.mean(scores[max(0, i-EPISODES_PER_SAVE):(i+1)])
             print('episode: ', i, 'score: ', score,
                   ' average score %.3f' % avg_score,
                   'epsilon %.3f' % agent.epsilon)
+            print('Saving...')
             agent.save_models()
-            print('unpausing...')
+            print('Done. Unpausing...\n')
             api.pause()
         else:
-            print('episode: ', i, 'score: ', score)
+            print('episode: ', i, 'score: ', score, '\n')
         eps_history.append(agent.epsilon)
         scores.append(score)
+        #sleep(1)    
+
     # x = [i+1 for i in range(numGames)]
     # plotLearning(x, scores, eps_history, filename)
