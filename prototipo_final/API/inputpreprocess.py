@@ -251,9 +251,9 @@ def classify_tile_2(x, y, img, sliced):
 
 
 PLAYER_TEMP_R = cv.imread(
-    'prototipo_final/API/char_templates/splinter_needle_r_new.png')
+    'prototipo_final/API/char_templates/splinter_needle_r_eye.png')
 PLAYER_TEMP_L = cv.imread(
-    'prototipo_final/API/char_templates/splinter_needle_l_new.png')
+    'prototipo_final/API/char_templates/splinter_needle_l_eye.png')
 ENEMY_TEMP_GREEN = cv.imread(
     'prototipo_final/API/char_templates/ninja_needle_green.jpg')
 ENEMY_TEMP_CYAN = cv.imread(
