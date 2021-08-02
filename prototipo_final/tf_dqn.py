@@ -117,7 +117,7 @@ class Agent(object):
             actions = self.q_eval.sess.run(self.q_eval.Q_values,
                       feed_dict={self.q_eval.input: state} )
             action = np.argmax(actions)
-            print(f'Non-random action picked: {action = }')
+            # print(f'Non-random action picked: {action = }')
         return action
 
     def learn(self):
@@ -156,9 +156,9 @@ class Agent(object):
                                    self.q_eval.actions: action_batch,
                                    self.q_eval.q_target: q_target})
 
-        if self.mem_cntr > 5000:# 5000:
+        if self.mem_cntr > 7000:# 5000:
             if self.epsilon > 0.05:
-                self.epsilon -= 8e-7
+                self.epsilon -= 12e-6
                 # self.epsilon -= 4e-2
             elif self.epsilon <= 0.05:
                 self.epsilon = 0.05
