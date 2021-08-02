@@ -14,7 +14,6 @@ class DeepQNetwork(object):
         self.chkpt_dir = chkpt_dir
         self.input_dims = input_dims
         self.sess = tf.Session()
-        # self.sess = tf.compat.v1.Session() # aparentemente "Sessions" fueron removidas en TF 2.0. Buscar más info
         self.build_network()
         self.sess.run(tf.global_variables_initializer())
         self.saver = tf.train.Saver()
@@ -156,7 +155,7 @@ class Agent(object):
                                    self.q_eval.actions: action_batch,
                                    self.q_eval.q_target: q_target})
 
-        if self.mem_cntr > 7000:# 5000:
+        if self.mem_cntr > 10000:
             if self.epsilon > 0.05:
                 self.epsilon -= 12e-6
                 # self.epsilon -= 4e-2
