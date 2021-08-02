@@ -27,12 +27,13 @@ if __name__ == '__main__':
     STACK_SIZE = 4
     SG_DIMS = (15, 20, STACK_SIZE)
     agent = Agent(gamma=0.99, epsilon=1.0, alpha=0.0005, input_dims=SG_DIMS,
-                  n_actions=11, mem_size=10000, batch_size=64)
+                  n_actions=11, mem_size=10000, batch_size=64, 
+                  q_next_dir='prototipo_final/tmp/q_next', q_eval_dir='prototipo_final/tmp/q_eval')
     if load_checkpoint:
         agent.load_models()
     scores = []
     eps_history = []
-    numGames = 5000 
+    numGames = 10000 
     score = 0
     map = api.setup()
 
@@ -63,6 +64,7 @@ if __name__ == '__main__':
             #print(f'{n_steps=}')
             #print(f'{map.p_lives = }')
             action = agent.choose_action(observation)
+            
             observation_, reward, done, restart = api.step(action, map)
 
             api.render(observation_)
@@ -111,7 +113,7 @@ if __name__ == '__main__':
             print('episode: ', i, 'score: ', score, '\n')
         eps_history.append(agent.epsilon)
         scores.append(score)
-        sleep(1)    
+        sleep(1.3)
 
     # x = [i+1 for i in range(numGames)]
     # plotLearning(x, scores, eps_history, filename)
