@@ -111,7 +111,7 @@ def step(action, map: Map):
     # Defining rewards
     reward = 0.0
     if e_lives_diff == -1:
-        reward += 3
+        reward += 5
         done = True
     if p_lives_diff == -1:
         reward -= 1
