@@ -16,7 +16,9 @@ https://stats.stackexchange.com/questions/181/how-to-choose-the-number-of-hidden
 
 
 # Resources:
-- Possible library for gamepad simulation:
-    https://github.com/4amVim/gamePyd
+Possible library for gamepad simulation:
+    * gamePyd: https://github.com/4amVim/gamePyd
+    * pygame: https://www.pygame.org/docs/
+        - Tutorial: https://www.youtube.com/watch?v=Hp0M8iExfDc&t=47s&ab_channel=DaFluffyPotato    
 
 
