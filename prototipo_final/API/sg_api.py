@@ -53,8 +53,8 @@ def restart() -> None:
     tap('down')
     sleep(WAIT)
     tap('swing')
-    sleep(0.2)
-    print("sleep time's over")
+    # sleep(0.2)
+    #print("sleep time's over")
  
 
 def reset(map: Map):
@@ -79,7 +79,7 @@ def reset(map: Map):
     return initial_state, start
 
 
-DELAY = 0.0
+DELAY = 0.1
 
 ACTIONS_DICT={0:'left', 1:'left', 2:'right', 3:'right', 4:'up', 5:'up', 6: 'down', 7:'down', 8:'jump', 9:'jump', 10:'swing'}
 
@@ -118,7 +118,7 @@ def step(action, map: Map):
         done = True
     if e_lives_diff - p_lives_diff == 0:
         reward -= 0.02
-    if (current_p_lives == 0) or (current_e_lives == 0):
+    if (current_p_lives < 3) or (current_e_lives < 3):
         restart = True
 
     map.p_lives = current_p_lives
@@ -131,6 +131,7 @@ def render(obs):
 def releaseAllKeys():
     for action in range(5):
         release(ACTIONS_DICT[action*2])
+        sleep(0.002)
 
 if __name__ == '__main__':
     sleep(2)
