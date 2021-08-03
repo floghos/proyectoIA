@@ -22,3 +22,14 @@ Possible library for gamepad simulation:
         - Tutorial: https://www.youtube.com/watch?v=Hp0M8iExfDc&t=47s&ab_channel=DaFluffyPotato    
 
 
+
+___________________________________________
+############################################################################################
+FATAL ERROR in
+action number 1
+of  Step Event0
+for object CONTROL:
+
+Unable to find any instance for object index '855684'
+at gml_Object_CONTROL_Step_0
+############################################################################################
