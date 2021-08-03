@@ -33,3 +33,6 @@ for object CONTROL:
 Unable to find any instance for object index '855684'
 at gml_Object_CONTROL_Step_0
 ############################################################################################
+Looks like this error is from gamemaker.
+Similar error shared here:
+- https://steamcommunity.com/app/214850/discussions/0/142261352661564528/
