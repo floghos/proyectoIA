@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import API.sg_api as api
 from datetime import datetime
 from time import sleep
-# import os
+import os
 #import gym
 # from utils import plotLearningwsk
 
@@ -25,31 +25,43 @@ def stack_frames(stacked_frames, frame, buffer_size):
 
 if __name__ == '__main__':
     load_checkpoint = False 
+    s_episode = 0
+    s_epsilon = 1.0
+    
     STACK_SIZE = 4
     SG_DIMS = (15, 20, STACK_SIZE)
-    agent = Agent(gamma=0.99, epsilon=1.0, alpha=0.00005, input_dims=SG_DIMS,
+    agent = Agent(gamma=0.99, epsilon=s_epsilon, alpha=0.00005, input_dims=SG_DIMS,
                   n_actions=11, mem_size=10000, batch_size=64, 
                   q_next_dir='prototipo_final/tmp/q_next', q_eval_dir='prototipo_final/tmp/q_eval')
     if load_checkpoint:
         agent.load_models()
-    scores = []
-    eps_history = []
-    eps_hist_short = []
-    score_averages = []
-    numGames = 10000 
+
+    if os.path.isfile('prototipo_final/learning_plots/scores_save.npy'):
+        scores = np.load('prototipo_final/learning_plots/scores_save.npy')
+        score_averages = np.load('prototipo_final/learning_plots/score_averages_save.npy')
+        eps_history = np.load(
+            'prototipo_final/learning_plots/eps_history_save.npy')
+        eps_hist_short = np.load('prototipo_final/learning_plots/eps_hist_short_save.npy')
+    else:    
+        scores = []
+        score_averages = []
+        eps_history = []
+        eps_hist_short = []
+    
+    numGames = 20000 
     score = 0
     print('Starting...')
     map = api.setup()
 
-    EPISODES_PER_SAVE = 10
+
+    EPISODES_PER_SAVE = 100
     MAX_STEPS = 100
-    for i in range(numGames):
+    for i in range(s_episode, numGames):
         
         observation = None
         start = False
         while not start:
             observation, start = api.reset(map)
-
         stacked_frames = None
         observation = stack_frames(stacked_frames, observation, STACK_SIZE)
         
@@ -116,6 +128,12 @@ if __name__ == '__main__':
 
             score_averages.append(avg_score)
             eps_hist_short.append(agent.epsilon)
+            np.save('prototipo_final/learning_plots/scores_save.npy', scores)
+            np.save('prototipo_final/learning_plots/score_averages_save.npy', score_averages)
+            np.save('prototipo_final/learning_plots/eps_history_save.npy', eps_history)
+            np.save(
+                'prototipo_final/learning_plots/eps_hist_short_save.npy', eps_hist_short)
+
             now = datetime.now()
             dt_string = now.strftime("%d-%m_%H%M%S")
             # plotting averages
