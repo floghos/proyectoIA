@@ -157,8 +157,8 @@ class Agent(object):
 
         if self.mem_cntr > 10000:
             if self.epsilon > 0.05:
-                self.epsilon -= 12e-6
-                # self.epsilon -= 4e-2
+                self.epsilon -= 24e-6
+                # self.epsilon -= 4e-7
             elif self.epsilon <= 0.05:
                 self.epsilon = 0.05
 
