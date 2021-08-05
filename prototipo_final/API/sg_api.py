@@ -129,6 +129,7 @@ def render(obs):
     renderObs(obs)
 
 def releaseAllKeys():
+    sleep(0.05)
     for action in range(5):
         release(ACTIONS_DICT[action*2])
         sleep(0.002)

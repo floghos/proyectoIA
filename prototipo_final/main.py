@@ -22,12 +22,36 @@ def stack_frames(stacked_frames, frame, buffer_size):
 
     return stacked_frames
 
+abort = False
 
 if __name__ == '__main__':
-    load_checkpoint = False 
-    s_episode = 0
-    s_epsilon = 1.0
+    load_checkpoint = True 
+    load_past_scores = False  # do we want to continue the plot of the previous checkpoint or start a new one? 
+    train = False  # do we want the agent to "train" or just exploit what it has learned?
     
+    # Remember to switch the path of the save files to 'prototipo_final/tmp/*' 
+    if load_past_scores and os.path.isfile('prototipo_final/learning_plots/scores_save.npy'):
+        scores = np.load('prototipo_final/learning_plots/scores_save.npy')
+        scores = list(scores)
+        score_averages = np.load('prototipo_final/learning_plots/score_averages_save.npy')
+        score_averages = list(score_averages)
+        eps_history = np.load('prototipo_final/learning_plots/eps_history_save.npy')
+        eps_history = list(eps_history)
+        eps_hist_short = np.load('prototipo_final/learning_plots/eps_hist_short_save.npy')
+        eps_hist_short = list(eps_hist_short)
+        s_episode = len(eps_history)
+        s_epsilon = eps_history[-1]
+    else:    
+        scores = []
+        score_averages = []
+        eps_history = []
+        eps_hist_short = []
+        s_epsilon = 1.0
+        s_episode = 0    
+
+    # overriding epsilon just to show of what it has learned 
+    s_epsilon = 0.0  
+ 
     STACK_SIZE = 4
     SG_DIMS = (15, 20, STACK_SIZE)
     agent = Agent(gamma=0.99, epsilon=s_epsilon, alpha=0.00005, input_dims=SG_DIMS,
@@ -36,23 +60,10 @@ if __name__ == '__main__':
     if load_checkpoint:
         agent.load_models()
 
-    if os.path.isfile('prototipo_final/learning_plots/scores_save.npy'):
-        scores = np.load('prototipo_final/learning_plots/scores_save.npy')
-        score_averages = np.load('prototipo_final/learning_plots/score_averages_save.npy')
-        eps_history = np.load(
-            'prototipo_final/learning_plots/eps_history_save.npy')
-        eps_hist_short = np.load('prototipo_final/learning_plots/eps_hist_short_save.npy')
-    else:    
-        scores = []
-        score_averages = []
-        eps_history = []
-        eps_hist_short = []
-    
-    numGames = 20000 
+    numGames = 500 
     score = 0
     print('Starting...')
     map = api.setup()
-
 
     EPISODES_PER_SAVE = 100
     MAX_STEPS = 100
@@ -75,11 +86,9 @@ if __name__ == '__main__':
               f'\nmem_counter = {agent.mem_cntr}')
         # ---- Episode START ----
         while not done and n_steps < MAX_STEPS:
-            #print(f'{n_steps=}')
-            #print(f'{map.p_lives = }')
             action = agent.choose_action(observation)
             
-            observation_, reward, done, restart = api.step(action, map)
+            observation_, reward, done, restart = api.step(action, map) 
 
             # Following segment just renders what our NN sees 
             # api.render(observation_)
@@ -102,8 +111,13 @@ if __name__ == '__main__':
             agent.store_transition(observation, action,
                                    reward, observation_, int(done))
             observation = observation_
-            if n_steps % 4 == 0:
+
+            if train and (n_steps % 4 == 0):
                 agent.learn()
+            
+            # if abort:
+            #     break
+                
         # ---- Episode END ---- 
        
         # Very important to release all pressed keys after each episode
@@ -128,11 +142,11 @@ if __name__ == '__main__':
 
             score_averages.append(avg_score)
             eps_hist_short.append(agent.epsilon)
-            np.save('prototipo_final/learning_plots/scores_save.npy', scores)
-            np.save('prototipo_final/learning_plots/score_averages_save.npy', score_averages)
-            np.save('prototipo_final/learning_plots/eps_history_save.npy', eps_history)
+            np.save('prototipo_final/tmp/scores_save.npy', scores)
+            np.save('prototipo_final/tmp/score_averages_save.npy', score_averages)
+            np.save('prototipo_final/tmp/eps_history_save.npy', eps_history)
             np.save(
-                'prototipo_final/learning_plots/eps_hist_short_save.npy', eps_hist_short)
+                'prototipo_final/tmp/eps_hist_short_save.npy', eps_hist_short)
 
             now = datetime.now()
             dt_string = now.strftime("%d-%m_%H%M%S")
@@ -142,32 +156,26 @@ if __name__ == '__main__':
             plt.plot(x, score_averages)  # plot rewards
             plt.plot(x, eps_hist_short)  # plot epsilon history (shortened)
             plt.xlabel('number of episodes'), plt.ylabel('scores and epsilon')
-            plt.title(f'Scores after {i} episodes (by 10 ep avrg)')
+            plt.title(f'Scores after {i} episodes (avg per {EPISODES_PER_SAVE} games)')
             plt.savefig(
                 f'prototipo_final/learning_plots/{dt_string}_first_{i}_eps_averages.png')
 
             # plotting everything
-            x = [j+1 for j in range(i+1)]
-            plt.figure()
-            plt.plot(x, scores)
-            plt.plot(x, eps_history)
-            plt.xlabel('number of episodes'), plt.ylabel('scores and epsilon')
-            plt.title(f'Scores after {i} episodes')
-            plt.savefig(
-                f'prototipo_final/learning_plots/{dt_string}_first_{i}_eps_full.png')
+            # x = [j+1 for j in range(i+1)]
+            # plt.figure()
+            # plt.plot(x, scores)
+            # plt.plot(x, eps_history)
+            # plt.xlabel('number of episodes'), plt.ylabel('scores and epsilon')
+            # plt.title(f'Scores after {i} episodes')
+            # plt.savefig(
+            #     f'prototipo_final/tmp/learning_plots/{dt_string}_first_{i}_eps_full.png')
             print('Done. Unpausing...\n')
             api.pause()
         else:
             print('score: ', score, '\n')
-               
-        sleep(1.3)
 
-        # # plotting scores and epsilon
-        # x = [k + 1 for k in range(i)]
-        # plt.figure()
-        # plt.plot(x, scores)     # plot rewards
-        # plt.plot(x,eps_history) # plot epsilon history
-        # plt.xlabel(' number of episodes'), plt.ylabel('scores and epsilon')
-        # plt.title('Learning graph')
-        # plt.show()
+        # if abort:
+        #     break
+
+        sleep(1.3)
 
